@@ -36,12 +36,19 @@ export default function StackedHorizontalBar({ items = [] }) {
 
   return (
     <div style={{ width: '100%', height: 220, boxSizing: 'border-box' }}>
+      <div className="chart-title" style={{ textAlign: 'center', marginBottom: 6, paddingTop: 4 }}>Edible / Not Edible - Creatures & Materials</div>
       <ResponsiveContainer width="100%" height="100%">
         {/* layout='vertical' makes the bars horizontal (one bar per Y category) */}
-        <BarChart data={data} layout="vertical" margin={{ top: 20, right: 16, left: 16, bottom: 20 }}>
+        {/*
+          Adjust margins and YAxis width so the plotted bars are visually
+          centered in their container. The YAxis consumes left space; reduce
+          its width slightly and give the right side a bit more margin to
+          balance.
+        */}
+        <BarChart data={data} layout="vertical" margin={{ top: 20, right: 24, left: 8, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" />
-          <YAxis type="category" dataKey="name" width={120} />
+          <YAxis type="category" dataKey="name" width={100} />
           <Tooltip />
           {/*
             Keep the legend items in the original order (Not Edible, Edible)

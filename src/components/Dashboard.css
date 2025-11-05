@@ -32,7 +32,8 @@
 }
 .chart-placeholder {
   flex: 1 1 0;
-  min-height: 160px;
+  /* increase default card height on large screens for better chart visibility */
+  min-height: 200px;
   background: #f3f3f3; /* slightly darker light grey for chart cards */
   border: 1px solid #e6e6e6;
   border-radius: 8px;
@@ -40,6 +41,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+/* Pie chart container: default small height, but larger on small screens
+   so the pie (on top) and legend (below) fit comfortably. */
+.pie-chart-container {
+  width: 100%;
+  /* increase default pie container height on large screens */
+  height: 264px;
+  box-sizing: border-box;
 }
 .chart-title { color: #666; font-weight: 600; }
 
@@ -51,6 +60,22 @@
   .pie-chart-wrap { flex-direction: column; }
   .pie-legend { width: 100%; display: flex; flex-direction: column; align-items: center; }
   .pie-legend-row { width: 100%; justify-content: center }
+  /* Make the pie container taller on small screens so the pie chart sits
+     above its legend without clipping. */
+  /* Increase height for narrow viewports (phones) so pie + legend fit */
+  /* Reduced ~15% from previous values so cards aren't too tall on phones */
+  .pie-chart-container { height: 374px; }
+  /* Reduced ~15% from previous values so cards aren't too tall on phones */
+  /* Reduced by ~10% from 374px to better fit the request */
+  .pie-chart-container { height: 337px; padding-left: 8px; padding-right: 8px; }
+
+  /* Ensure the SVG can render labels outside the immediate pie bounds
+     and that the placeholder doesn't clip them. Some browsers may apply
+     clipping depending on parent overflow — force visible here. */
+  .pie-chart-container svg { overflow: visible; }
+  /* Reduced by ~10% from 272px */
+  .chart-placeholder { min-height: 245px; overflow: visible; }
+  .chart-placeholder > div { overflow: visible; }
 }
 
 /* Ensure legend text is readable (override any inherited color rules) */
@@ -231,7 +256,11 @@
 
   /* Stack chart placeholders on small screens */
   .charts-row { flex-direction: column; }
-  .chart-placeholder { min-height: 180px; }
+  /* Make placeholders taller on narrow screens so charts and legends fit
+    (reduced ~15% from previous 480px to better match requested sizing). */
+  /* Reduced by ~10% from 408px */
+  .chart-placeholder { min-height: 367px; align-items: stretch; overflow: visible; }
+  .chart-placeholder > div { height: 100%; }
 
   /* Show the explicit label spans on mobile */
   .field-label { display: inline-block; font-weight: 600; margin-right: 0.25rem }
