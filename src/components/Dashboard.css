@@ -141,6 +141,33 @@
   width: 100%;
   border-collapse: collapse;
 }
+
+/* Charts toggle button styling moved from inline styles in Dashboard.jsx */
+.charts-toggle {
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+  font: inherit;
+}
+.charts-toggle.active {
+  background: #eef;
+}
+.charts-toggle:focus {
+  outline: 3px solid rgba(100, 150, 255, 0.25);
+  outline-offset: 2px;
+}
+
+/* Wrapper for the charts toggle so the button can be centered */
+.charts-toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 0.5rem 0;
+}
 .item-table { table-layout: auto; }
 .item-table th, .item-table td { vertical-align: top; }
 .item-table th { color: var(--label-color); font-weight: 600; }

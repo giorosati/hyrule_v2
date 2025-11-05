@@ -29,27 +29,54 @@ export default function Dashboard({ endpoint = 'creatures' }) {
   // `fetchCategory` which tells the API which compendium category to return.
   // Default to the last selection saved in localStorage (so full-page
   // reloads remember the user's choice). Falling back to 'all' if none.
-  const getInitialCategory = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const ALLOWED_CATEGORIES = ['all', 'creatures', 'equipment', 'materials', 'monsters', 'treasure']
+  // Determine initial category in this priority:
+  // 1. If we were navigated here from the detail view and it included
+  //    dashboardState.fetchCategory, trust that (this preserves back-nav state).
+  // 2. Otherwise try localStorage (validated). 3. Fallback to 'all'.
+  const determineInitialCategory = () => {
+    try {
+      // Only trust navigation state when it was explicitly set by our
+      // in-app navigation (we set `fromHistory: true` on links to detail
+      // views). This avoids picking up unrelated history state on a hard
+      // reload which should default to 'all'.
+      const nav = location && location.state
+      if (nav && nav.fromHistory && nav.dashboardState && nav.dashboardState.fetchCategory) {
+        const navCat = String(nav.dashboardState.fetchCategory)
+        if (ALLOWED_CATEGORIES.includes(navCat)) return navCat
+      }
+    } catch (e) {
+      // ignore
+    }
     if (typeof window === 'undefined') return 'all'
     try {
       const saved = localStorage.getItem('hyrule:lastCategory')
-      return saved || 'all'
+      if (saved && ALLOWED_CATEGORIES.includes(saved)) return saved
     } catch (e) {
-      return 'all'
+      // ignore
     }
+    return 'all'
   }
-  const [fetchCategory, setFetchCategory] = useState(getInitialCategory)
+
+  const [fetchCategory, setFetchCategory] = useState(determineInitialCategory)
   // track which items' long location lists are expanded
   const [expandedIds, setExpandedIds] = useState(new Set())
   // track images that failed to load so we can show a placeholder
   const [imageErrorIds, setImageErrorIds] = useState(new Set())
-  const navigate = useNavigate()
-  const location = useLocation()
+  // show/hide charts toggle
+  const [showCharts, setShowCharts] = useState(true)
 
   // If we were navigated back from a detail view with dashboardState in
   // location.state, restore the UI state (query, fetchCategory, expanded ids, image errors)
   useEffect(() => {
-    if (location.state && location.state.dashboardState) {
+    // Only restore dashboard state when the navigation explicitly came
+    // from our link (we tag it with `fromHistory: true`). This keeps
+    // normal page loads (including hard reloads) using the default
+    // startup behaviour.
+    if (location.state && location.state.fromHistory && location.state.dashboardState) {
       const s = location.state.dashboardState
       if (s.query != null) setQuery(s.query)
       if (s.fetchCategory != null) setFetchCategory(s.fetchCategory)
@@ -157,25 +184,43 @@ export default function Dashboard({ endpoint = 'creatures' }) {
           Zelda: Breath of the Wild and Zelda: Tears of the Kingdom
          </em></h4>
         </div>
-        {/* Placeholder chart row: two placeholders that will be replaced with Recharts graphs */}
-        <div className="charts-row" aria-hidden="false">
-          <div className="chart-placeholder" role="img" aria-label="Chart placeholder 1">
-            {/* Pie chart showing counts per category */}
-            <div style={{ width: '100%', height: '100%' }}>
-              <PieCategoryChart items={items} />
-            </div>
-          </div>
-          <div className="chart-placeholder" role="img" aria-label="Stacked horizontal bar chart">
-            <div style={{ width: '100%', height: '100%' }}>
-              <StackedHorizontalBar items={items} />
-            </div>
-          </div>
+        {/* Chart visibility toggle */}
+        <div className="charts-toggle-wrapper">
+          <button
+            type="button"
+            aria-pressed={showCharts}
+            onClick={() => setShowCharts(s => !s)}
+            className={`charts-toggle ${showCharts ? 'active' : ''}`}
+          >
+            {showCharts ? 'Hide Charts' : 'Show Charts'}
+          </button>
         </div>
+        {/* Placeholder chart row: two placeholders that will be replaced with Recharts graphs */}
+        {showCharts ? (
+          <div className="charts-row" aria-hidden="false">
+            <div className="chart-placeholder" role="img" aria-label="Chart placeholder 1">
+              {/* Pie chart showing counts per category */}
+              <div style={{ width: '100%', height: '100%' }}>
+                <PieCategoryChart items={items} />
+              </div>
+            </div>
+            <div className="chart-placeholder" role="img" aria-label="Stacked horizontal bar chart">
+              <div style={{ width: '100%', height: '100%' }}>
+                <StackedHorizontalBar items={items} />
+              </div>
+            </div>
+          </div>
+        ) : null}
          
         <div className="controls">
           <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span className="control-label" style={{ fontSize: '0.9rem' }}>Category:</span>
-            <select aria-label="Select API category" value={fetchCategory} onChange={e => setFetchCategory(e.target.value)}>
+            <select aria-label="Select API category" value={fetchCategory} onChange={e => {
+              const v = String(e.target.value)
+              setFetchCategory(v)
+              // Persist immediately so a quick refresh keeps the user's choice
+              try { localStorage.setItem('hyrule:lastCategory', v) } catch (err) { /* ignore */ }
+            }}>
               <option value="all">All</option>
               <option value="creatures">Creatures</option>
               <option value="equipment">Equipment</option>
