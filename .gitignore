@@ -1,0 +1,68 @@
+## Node
+node_modules/
+dist/
+.vite/
+/.parcel-cache
+
+## Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+## Env files
+.env
+.env.*.local
+
+## Editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## macOS Icon
+Icon?
+
+## Build output
+build/
+
+## Types
+*.tsbuildinfo
+
+## Misc
+.cache/
+.turbo/
+
+## JetBrains
+/.idea/
+
+## Optional: local lockfiles
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

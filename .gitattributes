@@ -1,0 +1,33 @@
+# Set default behavior, in case users don't have core.autocrlf set
+* text=auto
+
+# Normalize line endings for common text file types to LF in the repo
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.ts     text eol=lf
+*.tsx    text eol=lf
+*.css    text eol=lf
+*.scss   text eol=lf
+*.html   text eol=lf
+*.json   text eol=lf
+*.md     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+
+# Mark binary files to avoid CRLF conversions
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.woff   binary
+*.woff2  binary
+*.eot    binary
+*.ttf    binary
+*.otf    binary
+*.mp4    binary
+*.mov    binary
+*.pdf    binary
+
+# Ensure shell scripts keep LF
+*.sh     text eol=lf

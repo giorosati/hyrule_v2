@@ -1,0 +1,213 @@
+.dashboard {
+  padding: 1rem;
+}
+/* Theme variables — easy to tweak colors project-wide. We expose
+   --label-color so mobile label text can be changed without editing
+   the media-query rules directly. */
+:root {
+  --label-color: #4e93fc;
+  /* How many lines to clamp "common locations" to on small screens.
+     Keep this as a variable so maintainers can tweak the clamp count
+     globally without hunting through media queries. We also set the
+     vendor-prefixed property alongside the standard one for broader
+     compatibility (some browsers still require the -webkit prefixed
+     implementation). */
+  --locations-clamp: 2;
+}
+.dashboard header {
+  display: flex;
+  flex-direction: column; /* always stack title above controls */
+  align-items: stretch;
+  gap: 1rem;
+}
+
+/* Reduce vertical spacing between the global page title and the
+   dashboard subtitle. The H1 lives in `App` and the H4 lives inside
+   the dashboard header; lowering their margins brings them closer. */
+.App h1 { margin-bottom: 0.25rem; }
+.dashboard header h4 { margin: 0.15rem 0 0.35rem 0; }
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap; /* allow controls to wrap on narrow widths */
+}
+
+/* Label used before form controls (category dropdown) */
+.controls .control-label {
+  color: var(--label-color);
+  font-weight: 600;
+}
+.controls input {
+  padding: 0.4rem 0.6rem;
+}
+.controls select {
+  padding: 0.35rem 0.6rem;
+}
+.dropdown-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 0.5rem;
+  border: 2px solid rgba(0,0,0,0.15);
+  border-top-color: rgba(0,0,0,0.6);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.stats {
+  margin: 0.75rem 0 0.75rem 0;
+  display: flex;
+  gap: 1rem;
+}
+
+/* Summary stat labels should use the global label color on all screen sizes */
+.stats .stat-label { color: var(--label-color); font-weight: 600; margin-right: 0.25rem; }
+.loading {
+  padding: 1rem;
+}
+.error {
+  color: #a00;
+  margin-bottom: 0.5rem;
+}
+.item-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.item-table { table-layout: auto; }
+.item-table th, .item-table td { vertical-align: top; }
+.item-table th { color: var(--label-color); font-weight: 600; }
+.item-table th:nth-child(1), .item-table td:nth-child(1) { width: 64px; }
+/* Name column: allow reasonable minimum and ellipsize if needed */
+/* Name column: shrink-to-fit to the longest name and ellipsize if needed */
+.item-table th:nth-child(2), .item-table td:nth-child(2) { width: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Category column: shrink-to-fit to the longest category name and never wrap */
+.item-table th:nth-child(3), .item-table td:nth-child(3) { width: 1px; white-space: nowrap; }
+/* Description: limit the maximum width so it doesn't push other columns too far */
+.item-table th:nth-child(4), .item-table td:nth-child(4) { max-width: 50%; min-width: 180px; }
+/* Common locations takes remaining space but will be clamped */
+.item-table th:nth-child(5), .item-table td:nth-child(5) { max-width: 40%; min-width: 10ch; }
+
+/* Clamp the common locations text to 2 lines */
+.locations-text {
+  display: -webkit-box;
+  /* Use a variable for the clamp count so it can be changed easily. */
+  line-clamp: var(--locations-clamp);
+  -webkit-line-clamp: var(--locations-clamp);
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.item-table th, .item-table td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  text-align: left;
+  word-break: break-word;
+}
+.item-table td.thumb { width: 64px; padding: 0.25rem; }
+.item-table td.thumb img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; display: block }
+.thumb-placeholder { width:56px; height:56px; background: #eee; border-radius:6px }
+
+.field-label { display: none; }
+
+.more-link {
+  background: none;
+  border: none;
+  color: #0366d6;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-left: 0.4rem;
+}
+.more-link:focus { outline: 2px solid rgba(3,102,214,0.2); }
+.empty {
+  margin-top: 0.5rem;
+  color: #555;
+}
+
+@media (max-width: 640px) {
+  /* Mobile: render each row as a stacked card with labeled fields */
+  .item-table, .item-table thead, .item-table tbody, .item-table th, .item-table td, .item-table tr {
+    display: block;
+  }
+  /* Hide the table header on small screens */
+  .item-table thead { display: none; }
+
+  .item-table tr {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0;
+  }
+
+  /* Make each cell a block field */
+  .item-table td {
+    border: none;
+    padding: 0.25rem 0;
+    display: block;
+  }
+
+  /* Image first, centered and larger on mobile */
+  .item-table td.thumb { order: 1; text-align: center; padding-bottom: 0.5rem }
+  .item-table td.thumb img { width: 96px; height: 96px; object-fit: cover; border-radius: 8px; display: block; margin: 0 auto }
+  .thumb-placeholder { width:96px; height:96px; background: #eee; border-radius:8px; margin: 0 auto }
+
+  /* Name on one line with label */
+  .item-table td:nth-child(2) { order: 2; width: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  .item-table td:nth-child(2)::before { content: ""; }
+
+  /* Category on one line with label */
+  .item-table td:nth-child(3) { order: 3; width: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  .item-table td:nth-child(3)::before { content: ""; }
+
+  /* Description label on its own line, value on next line */
+  .item-table td:nth-child(4) { order: 4 }
+  .item-table td:nth-child(4)::before { content: "Description:"; display: block; font-weight: 600; margin-bottom: 0.25rem }
+
+  /* Common locations label on its own line, clamp value to 2 lines */
+  .item-table td:nth-child(5) { order: 5 }
+  .item-table td:nth-child(5)::before { content: "Common Locations:"; display: block; font-weight: 600; margin-bottom: 0.25rem }
+  .item-table td:nth-child(5) .locations-text {
+   /* Respect the global clamp variable; vendor-prefixed fallback is kept
+     for older WebKit-based browsers. */
+   line-clamp: var(--locations-clamp);
+   display: -webkit-box;
+   -webkit-line-clamp: var(--locations-clamp);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Divider between items: centered, 80% of viewport */
+  .item-table tr::after {
+    content: "";
+    display: block;
+    width: 80vw;
+    height: 1px;
+    background: #e6e6e6;
+    margin: 0.75rem auto 0.75rem auto;
+  }
+
+  /* Show the explicit label spans on mobile */
+  .field-label { display: inline-block; font-weight: 600; margin-right: 0.25rem }
+
+  /* On small screens, ensure the actual data values are white for
+     visibility against the card background, but make the label text
+     a contrasting, readable color. The label color uses a light
+     blue that contrasts well against darker/card backgrounds while
+     remaining distinct from the white data text. */
+  .item-table td { color: #ffffff; }
+  .item-table td .field-value { color: #ffffff; }
+  .item-table td .field-label { color: var(--label-color); }
+
+  /* Ensure the pseudo-labels inserted via ::before for Description
+     and Common Locations on small screens use the same label color. */
+  .item-table td:nth-child(4)::before,
+  .item-table td:nth-child(5)::before {
+    color: var(--label-color);
+  }
+
+  /* Summary stats: label in the configured label color, value in white */
+  .stats .stat-label { color: var(--label-color); font-weight: 600; margin-right: 0.25rem; }
+  .stats .stat-value { color: #ffffff; }
+}
