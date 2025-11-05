@@ -4,7 +4,7 @@ Submitted by: Giovanni Rosati
 
 This web app: Extends hyrule_api with React routing and Recharts graphs
 
-Time spent: **X** hours spent in total
+Time spent: 10 hours spent in total
 
 ## Required Features
 
