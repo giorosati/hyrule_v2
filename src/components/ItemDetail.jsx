@@ -62,16 +62,17 @@ export default function ItemDetail() {
   }, [id, category, item])
 
   // When returning to dashboard explicitly, prefer history back because it
-  // will preserve scroll and state. If history isn't available, navigate to '/'
+  // When returning to dashboard, prefer using the explicit dashboardState
+  // (if provided) so the dashboard can rehydrate its filters (including the
+  // selected category). If no dashboardState is available, fall back to
+  // history back which preserves scroll. If neither applies, navigate to '/'.
   function goBack() {
-    if (location.state && location.state.fromHistory) {
-      navigate(-1)
-      return
-    }
-    // If caller provided dashboardState, navigate to root with that state so
-    // the dashboard can rehydrate its UI.
     if (location.state && location.state.dashboardState) {
       navigate('/', { state: { dashboardState: location.state.dashboardState } })
+      return
+    }
+    if (location.state && location.state.fromHistory) {
+      navigate(-1)
       return
     }
     navigate('/')
@@ -103,12 +104,27 @@ export default function ItemDetail() {
               <tbody>
                 {Object.keys(item)
                   .filter(k => String(k).toLowerCase() !== 'dlc')
-                  .map(key => (
-                    <tr key={key} style={{ borderTop: '1px solid #eee' }}>
-                      <td className="detail-key" style={{ padding: '0.5rem 0.75rem', width: '28%', verticalAlign: 'top' }}>{key}</td>
-                      <td className="detail-value" style={{ padding: '0.5rem 0.75rem' }}><PrettyValue value={item[key]} /></td>
-                    </tr>
-                  ))}
+                  .map(key => {
+                    // Human-friendly label for the key (visible to user).
+                    // Special-case some fields (e.g. edible) and otherwise
+                    // convert snake_case / camelCase to Title Case.
+                    const rawKey = String(key)
+                    let label
+                    if (rawKey.toLowerCase() === 'edible') label = 'Edible'
+                    else {
+                      // replace underscores with spaces, split camelCase, then title-case
+                      const spaced = rawKey
+                        .replace(/_/g, ' ')
+                        .replace(/([a-z])([A-Z])/g, '$1 $2')
+                      label = spaced.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                    }
+                    return (
+                      <tr key={key} style={{ borderTop: '1px solid #eee' }}>
+                        <td className="detail-key" style={{ padding: '0.5rem 0.75rem', width: '28%', verticalAlign: 'top' }}>{label}</td>
+                        <td className="detail-value" style={{ padding: '0.5rem 0.75rem' }}><PrettyValue value={item[key]} /></td>
+                      </tr>
+                    )
+                  })}
               </tbody>
             </table>
           </div>

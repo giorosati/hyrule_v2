@@ -21,6 +21,43 @@
   gap: 1rem;
 }
 
+/* Placeholder chart row */
+.charts-row {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  background: transparent; /* transparent background behind charts (was light grey) */
+  padding: 0.75rem;
+  border-radius: 10px;
+}
+.chart-placeholder {
+  flex: 1 1 0;
+  min-height: 160px;
+  background: #f3f3f3; /* slightly darker light grey for chart cards */
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chart-title { color: #666; font-weight: 600; }
+
+/* Legend styling for pie chart */
+.pie-legend-row { font-size: 0.95rem; }
+.pie-legend-row span { line-height: 1 }
+
+@media (max-width: 640px) {
+  .pie-chart-wrap { flex-direction: column; }
+  .pie-legend { width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .pie-legend-row { width: 100%; justify-content: center }
+}
+
+/* Ensure legend text is readable (override any inherited color rules) */
+.pie-legend, .pie-legend-row, .pie-legend-row span {
+  color: #000 !important;
+}
+
 /* Reduce vertical spacing between the global page title and the
    dashboard subtitle. The H1 lives in `App` and the H4 lives inside
    the dashboard header; lowering their margins brings them closer. */
@@ -191,6 +228,10 @@
     background: #e6e6e6;
     margin: 0.75rem auto 0.75rem auto;
   }
+
+  /* Stack chart placeholders on small screens */
+  .charts-row { flex-direction: column; }
+  .chart-placeholder { min-height: 180px; }
 
   /* Show the explicit label spans on mobile */
   .field-label { display: inline-block; font-weight: 600; margin-right: 0.25rem }

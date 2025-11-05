@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
+import PieCategoryChart from './PieCategoryChart'
+import StackedHorizontalBar from './StackedHorizontalBar'
 import normalizeCategory from '../utils/normalizeCategory'
 import { fetchList } from '../api/hyruleApi'
 import './Dashboard.css'
@@ -25,7 +27,18 @@ export default function Dashboard({ endpoint = 'creatures' }) {
   const [query, setQuery] = useState('')
   // category used for client-side filtering was removed in favor of
   // `fetchCategory` which tells the API which compendium category to return.
-  const [fetchCategory, setFetchCategory] = useState('creatures')
+  // Default to the last selection saved in localStorage (so full-page
+  // reloads remember the user's choice). Falling back to 'all' if none.
+  const getInitialCategory = () => {
+    if (typeof window === 'undefined') return 'all'
+    try {
+      const saved = localStorage.getItem('hyrule:lastCategory')
+      return saved || 'all'
+    } catch (e) {
+      return 'all'
+    }
+  }
+  const [fetchCategory, setFetchCategory] = useState(getInitialCategory)
   // track which items' long location lists are expanded
   const [expandedIds, setExpandedIds] = useState(new Set())
   // track images that failed to load so we can show a placeholder
@@ -51,6 +64,19 @@ export default function Dashboard({ endpoint = 'creatures' }) {
     // run once on mount only
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+    // Persist the last chosen category so full reloads remember the user's
+    // preference. We deliberately persist every time `fetchCategory` changes;
+    // restoring from a detail view will set `fetchCategory` and then persist it
+    // (which is fine).
+    useEffect(() => {
+      if (typeof window === 'undefined') return
+      try {
+        localStorage.setItem('hyrule:lastCategory', fetchCategory)
+      } catch (e) {
+        // ignore localStorage errors (e.g., quota, private mode)
+      }
+    }, [fetchCategory])
 
   useEffect(() => {
     let mounted = true
@@ -130,6 +156,20 @@ export default function Dashboard({ endpoint = 'creatures' }) {
           <br />
           Zelda: Breath of the Wild and Zelda: Tears of the Kingdom
          </em></h4>
+        </div>
+        {/* Placeholder chart row: two placeholders that will be replaced with Recharts graphs */}
+        <div className="charts-row" aria-hidden="false">
+          <div className="chart-placeholder" role="img" aria-label="Chart placeholder 1">
+            {/* Pie chart showing counts per category */}
+            <div style={{ width: '100%', height: '100%' }}>
+              <PieCategoryChart items={items} />
+            </div>
+          </div>
+          <div className="chart-placeholder" role="img" aria-label="Stacked horizontal bar chart">
+            <div style={{ width: '100%', height: '100%' }}>
+              <StackedHorizontalBar items={items} />
+            </div>
+          </div>
         </div>
          
         <div className="controls">
