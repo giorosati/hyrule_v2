@@ -7,7 +7,8 @@ export default defineConfig({
   // '/<repo-name>/' so asset URLs resolve correctly. We also output
   // the build into `docs/` so GitHub Pages can serve from the main/docs
   // folder without extra deployment tooling.
-  base: '/hyrule-api/',
+  // NOTE: changed to match the desired site path '/hyrule_v2/'
+  base: '/hyrule_v2/',
   plugins: [react()],
   build: {
     outDir: 'docs'
