@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
+import normalizeCategory from '../utils/normalizeCategory'
 import { fetchList } from '../api/hyruleApi'
 import './Dashboard.css'
 
@@ -28,6 +30,27 @@ export default function Dashboard({ endpoint = 'creatures' }) {
   const [expandedIds, setExpandedIds] = useState(new Set())
   // track images that failed to load so we can show a placeholder
   const [imageErrorIds, setImageErrorIds] = useState(new Set())
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // If we were navigated back from a detail view with dashboardState in
+  // location.state, restore the UI state (query, fetchCategory, expanded ids, image errors)
+  useEffect(() => {
+    if (location.state && location.state.dashboardState) {
+      const s = location.state.dashboardState
+      if (s.query != null) setQuery(s.query)
+      if (s.fetchCategory != null) setFetchCategory(s.fetchCategory)
+      if (s.expandedIds) setExpandedIds(new Set(s.expandedIds))
+      if (s.imageErrorIds) setImageErrorIds(new Set(s.imageErrorIds))
+      if (typeof s.scrollY === 'number') {
+        setTimeout(() => window.scrollTo(0, s.scrollY), 0)
+      }
+      // Clear the state so it doesn't get reapplied accidentally
+      try { location.state.dashboardState = null } catch (e) { /* ignore */ }
+    }
+    // run once on mount only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -155,59 +178,81 @@ export default function Dashboard({ endpoint = 'creatures' }) {
             </thead>
             <tbody>
               {filtered.map(it => (
-                  <tr key={it.id}>
-                    <td className="thumb">
-                      {it.image && !imageErrorIds.has(it.id) ? (
-                        <img
-                          src={it.image}
-                          alt={it.name}
-                          loading="lazy"
-                          onError={() => setImageErrorIds(prev => new Set([...prev, it.id]))}
-                        />
+                <tr key={it.id}>
+                  <td className="thumb">
+                    {it.image && !imageErrorIds.has(it.id) ? (
+                      <img
+                        src={it.image}
+                        alt={it.name}
+                        loading="lazy"
+                        onError={() => setImageErrorIds(prev => new Set([...prev, it.id]))}
+                      />
+                    ) : (
+                      <div className="thumb-placeholder" aria-hidden="true" />
+                    )}
+                  </td>
+                  <td>
+                    <span className="field-label">Name: </span>
+                    <span className="field-value">
+                      <Link
+                        to={`/item/${encodeURIComponent(normalizeCategory(it.category))}/${encodeURIComponent(it.id)}`}
+                        state={{
+                          item: it.raw ?? it,
+                          dashboardState: {
+                            query,
+                            fetchCategory,
+                            expandedIds: Array.from(expandedIds),
+                            imageErrorIds: Array.from(imageErrorIds),
+                            scrollY: typeof window !== 'undefined' ? window.scrollY : 0,
+                          },
+                          fromHistory: true,
+                        }}
+                        className="item-link"
+                      >
+                        {it.name}
+                      </Link>
+                    </span>
+                  </td>
+                  <td><span className="field-label">Category: </span><span className="field-value">{it.category}</span></td>
+                  <td>{it.description}</td>
+                  <td>
+                    {Array.isArray(it.common_locations) ? (
+                      it.common_locations.length === 0 ? (
+                        '—'
                       ) : (
-                        <div className="thumb-placeholder" aria-hidden="true" />
-                      )}
-                    </td>
-                    <td><span className="field-label">Name: </span><span className="field-value">{it.name}</span></td>
-                    <td><span className="field-label">Category: </span><span className="field-value">{it.category}</span></td>
-                    <td>{it.description}</td>
-                    <td>
-                      {Array.isArray(it.common_locations) ? (
-                        it.common_locations.length === 0 ? (
-                          '—'
-                        ) : (
-                          (() => {
-                            const list = it.common_locations
-                            const isExpanded = expandedIds.has(it.id)
-                            const visible = isExpanded ? list : list.slice(0, 3)
-                            return (
-                              <div>
-                                <span className="locations-text" title={!isExpanded ? list.join(', ') : ''}>{visible.join(', ')}</span>
-                                {list.length > 3 && (
-                                  <button
-                                    className="more-link"
-                                    aria-expanded={isExpanded}
-                                    onClick={() => {
-                                      setExpandedIds(prev => {
-                                        const next = new Set(prev)
-                                        if (next.has(it.id)) next.delete(it.id)
-                                        else next.add(it.id)
-                                        return next
-                                      })
-                                    }}
-                                  >
-                                    {isExpanded ? ' show less' : ` …more (${list.length - 3})`}
-                                  </button>
-                                )}
-                              </div>
-                            )
-                          })()
-                        )
-                      ) : (
-                        it.common_locations || '—'
-                      )}
-                    </td>
-                  </tr>
+                        (() => {
+                          const list = it.common_locations
+                          const isExpanded = expandedIds.has(it.id)
+                          const visible = isExpanded ? list : list.slice(0, 3)
+                          return (
+                            <div>
+                              <span className="locations-text" title={!isExpanded ? list.join(', ') : ''}>{visible.join(', ')}</span>
+                              {list.length > 3 && (
+                                <button
+                                  className="more-link"
+                                  aria-expanded={isExpanded}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setExpandedIds(prev => {
+                                      const next = new Set(prev)
+                                      if (next.has(it.id)) next.delete(it.id)
+                                      else next.add(it.id)
+                                      return next
+                                    })
+                                  }}
+                                >
+                                  {isExpanded ? ' show less' : ` …more (${list.length - 3})`}
+                                </button>
+                              )}
+                            </div>
+                          )
+                        })()
+                      )
+                    ) : (
+                      it.common_locations || '—'
+                    )}
+                  </td>
+                </tr>
               ))}
             </tbody>
           </table>

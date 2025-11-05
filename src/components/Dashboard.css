@@ -128,6 +128,10 @@
   color: #555;
 }
 
+/* Make Link used for item names visually match surrounding text */
+.item-link { color: inherit; text-decoration: none; }
+.item-link:focus, .item-link:hover { text-decoration: underline; }
+
 @media (max-width: 640px) {
   /* Mobile: render each row as a stacked card with labeled fields */
   .item-table, .item-table thead, .item-table tbody, .item-table th, .item-table td, .item-table tr {
@@ -210,4 +214,43 @@
   /* Summary stats: label in the configured label color, value in white */
   .stats .stat-label { color: var(--label-color); font-weight: 600; margin-right: 0.25rem; }
   .stats .stat-value { color: #ffffff; }
+}
+
+/* Item detail responsive rules ------------------------------------------------- */
+.item-detail { padding: 0.5rem 0; }
+.item-detail img { max-width: 100%; height: auto; display: block; border-radius: 8px; }
+.detail-container { max-width: 900px; margin: 0 auto; padding: 0 1rem; box-sizing: border-box; }
+.item-detail { text-align: center; }
+.detail-table th, .detail-table td { border: none; }
+.detail-key { color: var(--label-color); font-weight: 600; vertical-align: top; text-align: left; }
+.detail-value { white-space: normal; word-break: break-word; overflow-wrap: anywhere; text-align: left; }
+.item-detail .detail-key, .item-detail .detail-value { text-align: center; }
+.item-detail .detail-key { text-align: center; }
+.item-detail .detail-value { text-align: center; }
+.detail-value pre { white-space: pre-wrap; word-break: break-word; margin: 0; background: #f8f8f8; padding: 0.5rem; border-radius: 6px; overflow-x: auto; }
+
+@media (max-width: 640px) {
+  /* Stack detail table rows on small screens so they never exceed viewport */
+  .detail-table, .detail-table thead, .detail-table tbody, .detail-table th, .detail-table td, .detail-table tr {
+    display: block;
+    width: 100%;
+  }
+  .detail-table tr { margin-bottom: 0.5rem; padding: 0.25rem 0; border-top: 1px solid #eee; }
+  .detail-key { display: block; margin-bottom: 0.25rem; }
+  .detail-value { display: block; }
+  .detail-value pre { max-width: 100%; }
+  /* Ensure long description text wraps and is centered with side padding */
+  .detail-container { padding: 0 1rem; }
+  .detail-key, .detail-value { text-align: center; }
+}
+
+/* Remove bullets from lists rendered in the detail view */
+.detail-value ul {
+  list-style: none;
+  margin: 0 0 0.5rem 0;
+  padding: 0;
+}
+.detail-value li {
+  margin: 0.25rem 0;
+  padding: 0;
 }
